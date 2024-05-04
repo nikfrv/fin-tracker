@@ -2,10 +2,14 @@ package com.example.nikfrvSpring.service;
 
 import com.example.nikfrvSpring.entity.User;
 import com.example.nikfrvSpring.exceptions.UserAlreadyExistsException;
+import com.example.nikfrvSpring.exceptions.UserNotFoundException;
+import com.example.nikfrvSpring.payload.request.UserRequest;
+import com.example.nikfrvSpring.payload.response.UserResponse;
 import com.example.nikfrvSpring.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -16,33 +20,38 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<User> getAllUsers(){
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers(){
+        List<User> users = userRepository.findAll();
+
+        return users.stream().
+                map(user -> new UserResponse(user.getUsername(),
+                user.getPassword()))
+                .collect(Collectors.toList());
     }
 
-    public void saveUser(String username, String password) throws UserAlreadyExistsException {
-        if (userRepository.findByUsername(username) != null){
+    public void saveUser(UserRequest userRequest) {
+        if (userRepository.findByUsername(userRequest.username()).isPresent()){
             throw new UserAlreadyExistsException("User already exists ");
         }
         User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
+        user.setUsername(userRequest.username());
+        user.setPassword(userRequest.password());
         userRepository.save(user);
     }
 
-    public boolean authenticateUser(String username, String password){
-        User user = userRepository.findByUsername(username);
-
-        if (user != null && user.getPassword().equals(password)){
+    public boolean authenticateUser(UserRequest userRequest){
+        User user = userRepository.findByUsername(userRequest.username()).orElseThrow(
+                ()-> new UserNotFoundException("User not found"));
+        if (user.getPassword().equals(userRequest.password())){
             return true;
         }
-
         return false;
     }
 
-    public Long delete (Long id){
+    public void removeUser(Long id){
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UserNotFoundException("User with id" + id +"not found"));
         userRepository.deleteById(id);
-        return id;
     }
 
 
