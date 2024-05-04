@@ -1,7 +1,7 @@
 package com.example.nikfrvSpring.controller;
 
-import com.example.nikfrvSpring.entity.User;
-import com.example.nikfrvSpring.exceptions.UserAlreadyExistsException;
+import com.example.nikfrvSpring.payload.request.UserRequest;
+import com.example.nikfrvSpring.payload.response.UserResponse;
 import com.example.nikfrvSpring.repository.UserRepository;
 import com.example.nikfrvSpring.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,42 +24,29 @@ public class UserController {
     private UserRepository userRepository;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestParam String username, @RequestParam String password) throws UserAlreadyExistsException {
-        try {
-            userService.saveUser(username, password);
-            return ResponseEntity.ok("User successfully registered!");
-        } catch (UserAlreadyExistsException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body("Error occured");
-        }
-
+    public void registerUser(@RequestBody UserRequest userRequest) {
+        userService.saveUser(userRequest);
     }
 
     @PostMapping ("/login")
-    public ResponseEntity<String> loginUser(@RequestParam String username, @RequestParam String password){
-        boolean isAuthenticated = userService.authenticateUser(username, password);
-
+    public void loginUser(@RequestBody UserRequest userRequest){
+        boolean isAuthenticated = userService.authenticateUser(userRequest );
         if (isAuthenticated){
             String message = "User successfully authorized";
-            return ResponseEntity.ok().body(message);
+            ResponseEntity.ok().body(message);
         }else {
             String errorMessage = "Wrong username or password";
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorMessage);
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorMessage);
         }
     }
 
     @GetMapping("/getAllUsers")
-    public List<User> findAllUsers(){
+    public List<UserResponse> findAllUsers(){
         return userService.getAllUsers();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteuser(@PathVariable Long id){
-        try {
-            return ResponseEntity.ok(userService.delete(id));
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body("Error occured");
-        }
+    public void deleteUser(@PathVariable Long id){
+        userService.removeUser(id);
     }
 }
