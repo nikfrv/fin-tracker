@@ -50,8 +50,8 @@ public class UserService {
 
     public void removeUser(Long id){
         User user = userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException("User with id" + id +"not found"));
-        userRepository.deleteById(id);
+                () -> new UserNotFoundException("User with id " + id +" not found"));
+        userRepository.delete(user);
     }
 
 

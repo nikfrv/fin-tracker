@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,7 +52,8 @@ public class TransactionService {
     }
 
     public List<TransactionResponse> getAllTransactionsById(Long userId) {
-        List<Transaction> transactions = transactionRepository.findAllByUserId(userId);
+        Optional<Transaction> transactions = Optional.ofNullable(transactionRepository.findAllByUserId(userId).orElseThrow(
+                () -> new UserNotFoundException("User with id " +userId+ " not found")));
 
         return transactions.stream()
                 .map(transaction -> new TransactionResponse(
@@ -59,5 +61,11 @@ public class TransactionService {
                         transaction.getType(),
                         transaction.getTransactionSum()))
                 .collect(Collectors.toList());
+    }
+
+    public void removeTransaction(Long id){
+        Transaction transaction = transactionRepository.findById(id).orElseThrow(()->
+                new TransactionNotFoundException("Transaction with id " + id +" not found"));
+        transactionRepository.delete(transaction);
     }
 }

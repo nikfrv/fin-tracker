@@ -32,4 +32,9 @@ public class TransactionController {
     public List<TransactionResponse> findAllTransactions(@RequestParam Long userId) {
         return transactionService.getAllTransactionsById(userId);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteTransaction(@PathVariable Long id){
+        transactionService.removeTransaction(id);
+    }
 }
