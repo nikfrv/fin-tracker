@@ -40,20 +40,38 @@ public class TransactionService {
         transactionRepository.save(transaction);
     }
 
-    public void remakeTransaction(Long id) {
+    public TransactionResponse getTransactionById(Long id) {
+        Transaction transaction = transactionRepository.findById(id).orElseThrow(
+                () -> new TransactionNotFoundException("Transaction with id " + id + " not found"));
+
+        return new TransactionResponse(
+                transaction.getTransactionDateAndTime(),
+                transaction.getType(),
+                transaction.getTransactionSum()
+        );
+    }
+
+    public void remakeTransaction(TransactionRequest transactionRequest, Long id) {
         Transaction transaction = transactionRepository.findById(id).orElseThrow(
                 () -> new TransactionNotFoundException("Transaction with id: " + id + " not found"));
 
-        transaction.setTransactionDateAndTime(transaction.getTransactionDateAndTime());
-        transaction.setType(transaction.getType());
-        transaction.setTransactionSum(transaction.getTransactionSum());
+        transaction.setTransactionDateAndTime(LocalDateTime.now());
+        transaction.setType(TransactionType.valueOf(transactionRequest.type()));
+        transaction.setTransactionSum(transactionRequest.transactionSum());
         transactionRepository.save(transaction);
 
     }
 
-    public List<TransactionResponse> getAllTransactionsById(Long userId) {
-        Optional<Transaction> transactions = Optional.ofNullable(transactionRepository.findAllByUserId(userId).orElseThrow(
-                () -> new UserNotFoundException("User with id " +userId+ " not found")));
+    public List<TransactionResponse> getAllTransactionsByUserId(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User with id " + userId + " not found");
+        }
+
+        Optional<Transaction> transactions = transactionRepository.findAllByUserId(userId);
+        if (transactions.isEmpty()) {
+            throw new TransactionNotFoundException("No transactions found for user with id " + userId);
+        }
 
         return transactions.stream()
                 .map(transaction -> new TransactionResponse(

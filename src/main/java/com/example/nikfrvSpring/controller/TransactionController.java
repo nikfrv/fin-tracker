@@ -24,13 +24,19 @@ public class TransactionController {
     }
 
     @PutMapping
-    public void updateTransaction(@RequestParam Long id) {
-        transactionService.remakeTransaction(id);
+    public void updateTransaction(@RequestBody TransactionRequest transactionRequest,
+                                  @RequestParam Long id) {
+        transactionService.remakeTransaction(transactionRequest, id);
     }
 
     @GetMapping
     public List<TransactionResponse> findAllTransactions(@RequestParam Long userId) {
-        return transactionService.getAllTransactionsById(userId);
+        return transactionService.getAllTransactionsByUserId(userId);
+    }
+
+    @GetMapping("/transaction")
+    public TransactionResponse inspectTransaction(@RequestParam Long id){
+        return transactionService.getTransactionById(id);
     }
 
     @DeleteMapping("/{id}")
