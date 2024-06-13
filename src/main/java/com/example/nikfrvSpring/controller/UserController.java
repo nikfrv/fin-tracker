@@ -1,5 +1,6 @@
 package com.example.nikfrvSpring.controller;
 
+
 import com.example.nikfrvSpring.payload.request.UserRequest;
 import com.example.nikfrvSpring.payload.response.UserResponse;
 import com.example.nikfrvSpring.repository.UserRepository;
@@ -30,7 +31,7 @@ public class UserController {
 
     @PostMapping ("/login")
     public void loginUser(@RequestBody UserRequest userRequest){
-        boolean isAuthenticated = userService.authenticateUser(userRequest );
+        boolean isAuthenticated = userService.authenticateUser(userRequest);
         if (isAuthenticated){
             String message = "User successfully authorized";
             ResponseEntity.ok().body(message);

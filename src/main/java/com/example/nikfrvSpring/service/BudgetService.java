@@ -10,6 +10,7 @@ import com.example.nikfrvSpring.repository.BudgetRepository;
 import com.example.nikfrvSpring.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ public class BudgetService {
 
         Budget budget = new Budget();
         budget.setUser(user);
+        budget.setBudgetCreationDate(LocalDateTime.now());
         budget.setBudgetName(budgetRequest.budgetName());
         budget.setBudgetSum(budgetRequest.budgetSum());
         budgetRepository.save(budget);
@@ -40,6 +42,7 @@ public class BudgetService {
         Budget budget = budgetRepository.findById(id).orElseThrow(
                 ()-> new BudgetNotFoundException("Budget with id" + id + "not found"));
 
+        budget.setBudgetCreationDate(LocalDateTime.now());
         budget.setBudgetName(budgetRequest.budgetName());
         budget.setBudgetSum(budgetRequest.budgetSum());
         budgetRepository.save(budget);
@@ -50,6 +53,7 @@ public class BudgetService {
                 ()-> new BudgetNotFoundException("Budget with id " +id+ " not found"));
 
         return new BudgetResponse(
+                budget.getBudgetCreationDate(),
                 budget.getBudgetName(),
                 budget.getBudgetSum()
         );
@@ -61,13 +65,14 @@ public class BudgetService {
             throw new UserNotFoundException("User with id" + userId + "not found");
         }
 
-        Optional<Budget> budgets = budgetRepository.findAllByUserId(userId);
+        List<Budget> budgets = budgetRepository.findAllByUserId(userId);
         if (budgets.isEmpty()){
             throw new BudgetNotFoundException("No budgets found for user with id " + userId);
         }
 
         return budgets.stream()
                 .map(budget -> new BudgetResponse(
+                        budget.getBudgetCreationDate(),
                         budget.getBudgetName(),
                         budget.getBudgetSum()))
                 .collect(Collectors.toList());

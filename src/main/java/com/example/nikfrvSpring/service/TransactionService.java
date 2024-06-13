@@ -33,7 +33,7 @@ public class TransactionService {
                 () -> new UserNotFoundException("User with id: " + userId + " not found"));
 
         Transaction transaction = new Transaction();
-        transaction.setTransactionDateAndTime(LocalDateTime.now());
+        transaction.setTransactionCreationDate(LocalDateTime.now());
         transaction.setUser(user);
         transaction.setType(TransactionType.valueOf(transactionRequest.type()));
         transaction.setTransactionSum(transactionRequest.transactionSum());
@@ -45,7 +45,7 @@ public class TransactionService {
                 () -> new TransactionNotFoundException("Transaction with id " + id + " not found"));
 
         return new TransactionResponse(
-                transaction.getTransactionDateAndTime(),
+                transaction.getTransactionCreationDate(),
                 transaction.getType(),
                 transaction.getTransactionSum()
         );
@@ -55,7 +55,7 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findById(id).orElseThrow(
                 () -> new TransactionNotFoundException("Transaction with id: " + id + " not found"));
 
-        transaction.setTransactionDateAndTime(LocalDateTime.now());
+        transaction.setTransactionCreationDate(LocalDateTime.now());
         transaction.setType(TransactionType.valueOf(transactionRequest.type()));
         transaction.setTransactionSum(transactionRequest.transactionSum());
         transactionRepository.save(transaction);
@@ -68,14 +68,14 @@ public class TransactionService {
             throw new UserNotFoundException("User with id " + userId + " not found");
         }
 
-        Optional<Transaction> transactions = transactionRepository.findAllByUserId(userId);
+        List<Transaction> transactions = transactionRepository.findAllByUserId(userId);
         if (transactions.isEmpty()) {
             throw new TransactionNotFoundException("No transactions found for user with id " + userId);
         }
 
         return transactions.stream()
                 .map(transaction -> new TransactionResponse(
-                        transaction.getTransactionDateAndTime(),
+                        transaction.getTransactionCreationDate(),
                         transaction.getType(),
                         transaction.getTransactionSum()))
                 .collect(Collectors.toList());
