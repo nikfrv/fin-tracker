@@ -8,6 +8,7 @@ import com.example.nikfrvSpring.payload.request.BudgetRequest;
 import com.example.nikfrvSpring.payload.response.BudgetResponse;
 import com.example.nikfrvSpring.repository.BudgetRepository;
 import com.example.nikfrvSpring.repository.UserRepository;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 public class BudgetService {
     private final BudgetRepository budgetRepository;
 
@@ -36,6 +38,7 @@ public class BudgetService {
         budget.setBudgetName(budgetRequest.budgetName());
         budget.setBudgetSum(budgetRequest.budgetSum());
         budgetRepository.save(budget);
+        log.info("Budget saved with ID {} for user {}", budget.getId(), userId);
     }
 
     public void remakeBudget(BudgetRequest budgetRequest, Long id){
@@ -46,12 +49,14 @@ public class BudgetService {
         budget.setBudgetName(budgetRequest.budgetName());
         budget.setBudgetSum(budgetRequest.budgetSum());
         budgetRepository.save(budget);
+        log.info("Remade budget with id {}", id);
     }
 
     public BudgetResponse getBudgetById (Long id){
         Budget budget = budgetRepository.findById(id).orElseThrow(
                 ()-> new BudgetNotFoundException("Budget with id " +id+ " not found"));
 
+        log.info("Retrieved budget with id {}", id);
         return new BudgetResponse(
                 budget.getBudgetCreationDate(),
                 budget.getBudgetName(),
@@ -70,6 +75,7 @@ public class BudgetService {
             throw new BudgetNotFoundException("No budgets found for user with id " + userId);
         }
 
+        log.info("Retrieved {} budgets for user {}", budgets.size(), userId);
         return budgets.stream()
                 .map(budget -> new BudgetResponse(
                         budget.getBudgetCreationDate(),
@@ -82,5 +88,6 @@ public class BudgetService {
         Budget budget = budgetRepository.findById(id).orElseThrow(
                 ()-> new BudgetNotFoundException("Budget with id" +id+ "not found"));
         budgetRepository.delete(budget);
+        log.info("Removed budget with id {}", id);
     }
 }

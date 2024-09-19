@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/admin")
 public class UserController {
     @Autowired
     private final UserService userService;
@@ -24,21 +24,9 @@ public class UserController {
 
     private UserRepository userRepository;
 
-    @PostMapping("/register")
-    public void registerUser(@RequestBody UserRequest userRequest) {
-        userService.saveUser(userRequest);
-    }
-
-    @PostMapping ("/login")
-    public void loginUser(@RequestBody UserRequest userRequest){
-        boolean isAuthenticated = userService.authenticateUser(userRequest);
-        if (isAuthenticated){
-            String message = "User successfully authorized";
-            ResponseEntity.ok().body(message);
-        }else {
-            String errorMessage = "Wrong username or password";
-            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorMessage);
-        }
+    @PutMapping("/promote")
+    public void promoteUser (@PathVariable Long userId){
+        userService.promoteToAdmin(userId);
     }
 
     @GetMapping("/getAllUsers")

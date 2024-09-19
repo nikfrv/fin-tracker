@@ -8,6 +8,7 @@ import com.example.nikfrvSpring.repository.TransactionRepository;
 import com.example.nikfrvSpring.repository.UserRepository;
 import com.example.nikfrvSpring.specification.BudgetSpecifications;
 import com.example.nikfrvSpring.specification.TransactionSpecifications;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Log4j2
 public class ReportService {
 
     private final TransactionRepository transactionRepository;
@@ -22,6 +24,7 @@ public class ReportService {
     private final BudgetRepository budgetRepository;
 
     private final UserRepository userRepository;
+
 
     public ReportService(TransactionRepository transactionRepository,
                          BudgetRepository budgetRepository, UserRepository userRepository) {
@@ -37,8 +40,10 @@ public class ReportService {
         Specification<Transaction> specification = Specification.where(TransactionSpecifications.withUserId(userId))
                 .and(TransactionSpecifications.withType(TransactionType.INCOME)
                         .and(TransactionSpecifications.withinDateTimeRange(startDateTime, endDateTime)));
-
-        return transactionRepository.findAll(specification);
+        List<Transaction> incomeTransactions = transactionRepository.findAll(specification);
+        log.info("Retrieved {} income transactions for user {} within the period {} - {}",
+                incomeTransactions.size(), userId, startDateTime, endDateTime);
+        return incomeTransactions;
     }
 
     public List<Transaction> getExpenseTransactionsByUserIdAndPeriod(Long userId,
@@ -48,7 +53,10 @@ public class ReportService {
                 .and(TransactionSpecifications.withType(TransactionType.EXPENSE)
                         .and(TransactionSpecifications.withinDateTimeRange(startDateTime, endDateTime)));
 
-        return transactionRepository.findAll(specification);
+        List<Transaction> expenseTransactions = transactionRepository.findAll(specification);
+        log.info("Retrieved {} expense transactions for user {} within the period {} - {}",
+                expenseTransactions.size(), userId, startDateTime, endDateTime);
+        return expenseTransactions;
     }
 
     public List<Budget> getBudgetsByUserIdAndPeriod(Long userId,
@@ -56,7 +64,9 @@ public class ReportService {
                                                     LocalDateTime endDateTime) {
         Specification<Budget> specification = Specification.where(BudgetSpecifications.withUserId(userId)
                 .and(BudgetSpecifications.withinDateTimeRange(startDateTime, endDateTime)));
-
-        return budgetRepository.findAll(specification);
+        List<Budget> budgets = budgetRepository.findAll(specification);
+        log.info("Retrieved {} budgets for user {} within the period {} - {}",
+                budgets.size(), userId, startDateTime, endDateTime);
+        return budgets;
     }
 }

@@ -1,4 +1,8 @@
 package com.example.nikfrvSpring.payload.response;
 
-public record UserResponse(String username, String password) {
+import com.example.nikfrvSpring.entity.Role;
+
+import java.util.List;
+
+public record UserResponse(String username, String password, List<String> roles) {
 }
