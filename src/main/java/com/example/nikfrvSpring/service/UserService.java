@@ -9,6 +9,7 @@ import com.example.nikfrvSpring.payload.response.UserResponse;
 import com.example.nikfrvSpring.repository.RoleRepository;
 import com.example.nikfrvSpring.repository.UserRepository;
 import com.example.nikfrvSpring.util.JwtUtil;
+import com.example.nikfrvSpring.util.RoleConstants;
 import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -62,12 +63,12 @@ public class UserService {
         user.setEmail(userRequest.email());
         user.setPassword(passwordEncoder.encode(userRequest.password()));
 
-        Role userRole = roleRepository.findByRoleName("ROLE_USER")
+        Role userRole = roleRepository.findByRoleName(RoleConstants.ROLE_USER)
                 .orElseThrow(() -> new RuntimeException("Default role not found"));
         user.setRoles(List.of(userRole));
 
         if (userRequest.isAdmin()) {
-            Role adminRole = roleRepository.findByRoleName("ROLE_ADMIN")
+            Role adminRole = roleRepository.findByRoleName(RoleConstants.ROLE_ADMIN)
                     .orElseThrow(() -> new RuntimeException("Admin role not found"));
             user.setRoles(List.of(userRole, adminRole));
         }
